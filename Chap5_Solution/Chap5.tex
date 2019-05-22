@@ -1,0 +1,359 @@
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{fontspec, xunicode, xltxtra}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{mathrsfs}
+\usepackage{enumerate}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{hyperref}
+\usepackage[a4paper,top=30mm,bottom=30mm,left=30mm,right=30mm]{geometry}
+
+\newcommand{\vv}[0]{\vdash\dashv}
+\renewcommand{\today}{\number\year 年 \number\month 月 \number\day 日}
+\newcommand*{\pt}[1]{\ensuremath{\underset{\uparrow}{#1}}}
+\newcommand{\RA}[0]{{\shortmid\!\Rightarrow}}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\def\dotminus{\mathbin{\ooalign{\hss\raise1ex\hbox{.}\hss\cr
+  \mathsurround=0pt$-$}}}
+\setlength\parindent{0pt}
+\vspace{-8ex}
+%\date{}
+\begin{document}
+
+\title{《计算模型导引》第五章参考答案\footnote{Ver. 0.1. 原答案由宋方敏教授给出手稿, 然后由助教丁超录入修订补充. 此文档来源为\url{https://github.com/sleepycoke/NJU_Comp_Models}}}
+\maketitle
+
+\section*{习题5.1}
+主要思想是先后抹除$\overline x$最后移到$\overline y$的头. 
+机器如下：
+\begin{center}
+	
+\begin{tabular}{|c|c|c|c|}
+	\hline
+	&0&1&解释\\
+	\hline
+	1&0R2&0R1&抹除第一个$\overline x$并指向$\overline y$头\\
+	2&0R3&1R2&移动到第二个$\overline x$头\\
+	3&0L4&0R3&抹除第二个$\overline x$\\
+	4&0L4&1L5&越过$\overline y$的最后一个1\\
+	5&0R6&1L5&移到$\overline y$头\\
+	\hline
+\end{tabular}
+\end{center}
+
+
+\section*{习题5.2}
+主要思想是每次抹掉输入的一个1对应两个输出各增加一个1. 
+%我们需要作一个预处理，添上两个输入$\overline 0$. 具体可以由如下机器$M_1$实现：
+%\begin{center}
+%\begin{tabular}{|c|c|c|c|}
+%	\hline
+%	&0&1&解释\\
+%	\hline
+%	1&0R2&1R1&跳过输入\\
+%	2&1R3&&写第一个$\overline 0$\\
+%	3&0R4&&跳过0\\
+%	4&1L5&&写第二个$\overline 0$\\
+%	5&0L6&&跳过0\\
+%	6&&1L7&跳过1\\
+%	7&0L8&&跳过0\\
+%	8&0R9&1L8&移到输入头\\
+%	\hline
+%\end{tabular}
+%\end{center}
+即设计机器$M$实现如下功能:\\
+\begin{align*}
+	M &| 1 : 0\cdots0\pt101^k01^k0\cdots \twoheadrightarrow u : 0\cdots0\pt1^{k+1}01^{k+1}0\cdots\\
+	M &| 1 : 0\cdots0\pt1^{l+1}01^k01^k0\cdots \twoheadrightarrow v : 0\cdots0\pt1^l01^{k+1}01^{k+1}0\cdots\\
+\end{align*}
+这里$k\ge 0$, $u$为停机状态. 这样$M[v:=1]$既可实现循环. 
+
+具体实现如下:
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+	\hline
+	&0&1&解释\\
+	\hline
+	1&&0R2&输入移除     1\\
+	2&0R3&1R12&判断输入是否还有1,移到尾部再跳过后面的0\\
+	3&1R4&1R3&输入为0, 那么走第一个分支3-8.将第一个$1^k$后的0改为1\\
+	4&&0R5&将第二个$1^k$的第一个1改为0\\
+	5&1R6&1R5&将第二个$1^k$后的0改为1\\
+	6&1L7&&再添个1\\
+	7&0L8&1L7&跳过$1^{k+1}$\\
+	8&0R9&1L8&移到输入头, 停机\\
+	12&0R13&1R12&输入不为0, 那么走第二个分支12-19.跳过第一个输入\\
+	13&1R14&1R13&将第一个$1^k$后的0改为1\\
+	14&&0R15&将第二个$1^k$的第一个1改为0\\
+	15&1R16&1R15&将第二个$1^k$后的0改为1\\
+	16&1L17&&再添个1\\
+	17&0L18&1L17&跳过$1^{k+1}$\\
+	18&0R19&1L18&再跳过$1^{k+1}$\\
+	19&0R1&1L19&再移到输入头，循环\\
+%	20&0L21&\\
+%	21&0R1&1L21\\
+		\hline
+\end{tabular}
+\end{center}
+%\begin{center}
+%\begin{tabular}{|c|c|c|}
+%	\hline
+%	&0&1\\
+%	\hline
+%
+%	\hline
+%\end{tabular}
+%\end{center}
+\section*{习题5.4}
+ 参照第133页定理5.14,我们需要作一个预处理，添上一个输入$\overline 1$. 具体可以由如下机器$M_3$实现：
+\begin{center}
+\begin{tabular}{|c|c|c|}
+	\hline
+	&0&1\\
+	\hline
+	1&0R2&1R1\\
+	2&&1R3\\
+	3&1L4&\\
+	4&&1L5\\
+	5&0L6&\\
+	6&0R7&1L6
+	\\
+	\hline
+\end{tabular}
+\end{center}
+
+如书中第134页构造机器$M_1$:
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+	\hline
+	&0&1\\
+	\hline
+	1&&0R2\\
+	2&0R$4$&1R3\\
+	3&0R4&1R3\\
+
+	
+	\hline
+\end{tabular}
+\end{center}
+
+令$M_2$为$M_1 \RA \fbox{double} \RA \fbox{compress} \RA \fbox{shiftl}$，从而\\
+若$x=0$, 则$M_2|1:0\pt{\overline x} 0 \overline y 0 \cdots \twoheadrightarrow v : 000\pt{\overline y} 0 \cdots$\\
+若$x>0$, 则$M_2|1:0\pt{\overline x} 0 \overline y 0 \cdots \twoheadrightarrow w : 00{ \overline{\pt x-1}} 0 \overline{g(y)} 0\cdots$, 其中$w$为$M_2$的输出时的状态. \\
+
+令$\fbox{f} = M_2[w:=1]$, $M_3\RA\fbox{f}$即为所求. 
+
+
+\section*{习题5.5}
+
+\begin{itemize}
+	\item 若$x=0$:
+	\begin{align*}
+		1&:0\pt10000\cdots\tag{1R2}\\
+		2&:01\pt0000\cdots\tag{0L3}\\
+		3&:0\pt10000\cdots\tag{1L3}\\
+		3&:\pt010000\cdots\tag{0L3}\\
+		3&:\pt{\phantom0}010000\cdots\tag{halt}\\
+	\end{align*}
+	\item 若$x>0$:
+	\begin{align*}
+		1&:0\pt11^x0000\cdots\tag{1R2}\\
+		2&:01\pt1^x0000\cdots\tag{0R1}\\
+		1&:010\pt1^{x-1}0000\cdots\tag{1R2}\\
+		2&:0101\pt1^{x-2}0000\cdots\tag{0R1}\\
+		&\cdots \tag{1R2, 0R1}\\
+		3&:\overbrace{0101\cdots0\pt1}^{\floor{x/2}+1\text{个01}}0000\cdots\tag{1L3}\\
+		&\cdots\tag{0L3, 1L3}\\
+		3&:\overbrace{\pt0101\cdots01}^{\floor{x/2}+1\text{个01}}\cdots010000\cdots\tag{0L3}\\
+		3&:\pt{\phantom0}\overbrace{0101\cdots01}^{\floor{x/2}+1\text{个01}}\cdots010000\cdots\tag{halt}\\
+	\end{align*}
+\end{itemize}
+总之就是擦除了第偶数个1,然后指向第一个0左边(越界).
+\section*{习题5.6}
+易见
+$M_2|1:0\pt{\overline x} 0 \overline y 0 \cdots \twoheadrightarrow 1 : 000\pt{\overline y} 0 \cdots$\\
+从而
+$M_2|1:0\pt1^n01^m01^k 0 \overline y 0 \cdots \twoheadrightarrow 1 : 0^{n+m+k+3}\pt0 0 \cdots$(停)\\
+又易见
+$M_2|1:\pt0 0 0 \cdots \twoheadrightarrow 7 : 0\pt1111 0 \cdots$\\
+于是$M_2|1:0\pt1^n01^m01^k 0 \overline y 0 \cdots \twoheadrightarrow
+7 : 0^{m+n+k+4}\pt1111 0 \cdots$(停)
+
+\section*{习题5.7}
+
+由于$$y=\floor{\sqrt{x}}\Leftrightarrow y \le \sqrt x < y + 1 \Leftrightarrow y^2 \le x < (y+1)^2$$
+所以
+$$f(x) = \mu y. x < (y+1)^2 = \mu y. N^2((sx)\dotminus(sy)^2)$$
+
+首先平方机器$\fbox{sqrt}$可由$\fbox{copy1}\RA\fbox{shiftl}\RA\fbox{multi}$构造，其中$\fbox{multi}$为习题5.3的乘法机器. 然后减法机器也在习题5.11中给出，于是$f$涉及到的机器都已经构造出, 那么$\fbox{f}$是可构造的. 具体构造过程可对照教材实现. 
+
+\section*{习题5.10}
+参照第133页定理5.14,我们需要作一个预处理，添上一个输入$\overline 0$. 具体可以由如下机器$M_3$实现：
+\begin{center}
+\begin{tabular}{|c|c|c|}
+	\hline
+	&0&1\\
+	\hline
+	1&0R2&1R1\\
+	2&1L3&\\
+	3&0L4&\\
+	4&0R5&1L4
+	\\
+	\hline
+\end{tabular}
+\end{center}
+接下来再如法构造$\fbox{f}$既可.最后结果为$M_3\RA\fbox f$.
+\section*{习题5.11}
+注意到$0\dotminus y = 0,\quad x \dotminus 0 = x, \quad (x+1)\dotminus(y+1) = x \dotminus y$, 我们可以分情况处理.
+机器如下:
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+	\hline
+	&0&1&解释\\
+	\hline
+	1&&0R2&将$x$减1\\
+	2&0R3&1R4&判断原$x$是否为0\\
+	3&1O15&0R3&原$x$为0那么把$\overline y$修改为1输出\\
+	4&0R11&1R4&原$x$不为0找到$\overline y$的头\\
+	5&0L6&1R5&找到$\overline y$的尾部\\
+	6&&0L7&将$y$减1\\
+	7&0L10&1L7&找到$\overline x$的尾\\
+	10&0R1&1L10&找到$\overline x$的头,迭代\\	
+	11&&1R12&跳过$\overline y$的第一个1\\
+	12&0L13&1R5&判断$y$是否为0\\
+	13&&0L16&原$y$为0，抹掉$\overline y$\\
+	14&0R15&1L14&原$y$为0，找到$\overline x$的头,输出$x$\\
+	15&&&停机\\
+	16&0L14&&前左跳过一个0\\
+	\hline
+\end{tabular}
+\end{center}
+计算过程如下：
+\begin{itemize}
+	\item 若$x=0$:
+	\begin{align*}
+		1&:0\pt10\overline y 000\cdots\tag{0R2}\\
+		2&:00\pt0\overline y 000\cdots\tag{0R3}\\
+		3&:000\pt{\overline y}0000\cdots\tag{0R3}\\
+		3&:0000{\overline {\pt y - 1}}0000\cdots\tag{0R3}\\
+		&\cdots\tag{0R3}\\
+		3&:000\cdots\pt00000\cdots\tag{1O15}\\
+		15&:000\cdots\pt10000\cdots\tag{halt}
+	\end{align*}
+	\item 若$x>0,\quad y=0$:
+	\begin{align*}
+		1&:0\pt11^x01 000\cdots\tag{0R2}\\
+		2&:00\pt1^x01000\cdots\tag{1R4}\\
+		&\cdots\tag{1R4}\\
+		4&:001^{x}\pt01 000\cdots\tag{0R11}\\
+		11&:001^{x}0\pt1 000\cdots\tag{1R12}\\
+		12&:001^{x}01 \pt000\cdots\tag{0L13}\\
+		13&:001^{x}0\pt1 000\cdots\tag{0L16}\\
+		16&:001^{x}\pt00 000\cdots\tag{0L14}\\
+		14&:001^{x-1}\pt10 000\cdots\tag{1L14}\\
+		&\cdots\tag{1L14}\\
+		14&:0\pt01^x0 000\cdots\tag{0R15}\\
+		15&:00\pt1^x0 000\cdots\tag{halt}\\
+	\end{align*}
+	\item 若$x>0,\quad y > 0$:
+	\begin{align*}
+		1&:0\pt11^x0\overline y 000\cdots\tag{0R2}\\
+		2&:00\pt1^x0\overline y 000\cdots\tag{1R4}\\
+		&\cdots\tag{1R4}\\
+		4&:001^{x}\pt0\overline { y} 000\cdots\tag{0R11}\\
+		11&:001^{x}0\overline { \pt y} 000\cdots\tag{1R12}\\
+		12&:001^{x}01\overline { \pt y-1} 000\cdots\tag{1R5}\\
+		&\cdots\tag{1R5}\\
+		5&:001^{x}0\overline {y} \pt000\cdots\tag{0L6}\\
+		6&:001^x01^{y}\pt1 000\cdots\tag{0L7}\\
+		7&:001^x01^{y-1}\pt1 000\cdots\tag{1L7}\\
+		&\cdots\tag{1L7}\\
+		7&:001^x\pt0\overline { y} 000\cdots\tag{0L10}\\
+		10&:001^{x-1}\pt101^{y} 000\cdots\tag{1L10}\\
+%		7&:001^x0\pt01^{y} 000\cdots\tag{0L7}\\
+%		7&:001^x\pt001^{y} 000\cdots\tag{0L7}\\
+%		7&:001^{x-1}\pt1001^{y} 000\cdots\tag{1L10}\\
+		&\cdots\tag{1L10}\\
+		10&:0\pt01^x01^{y} 000\cdots\tag{0R1}\\
+		1&:00\pt1^x01^{y} 000\cdots\tag{Compute $(x-1)\dotminus(y-1)$ }\\
+	\end{align*}
+\end{itemize}
+\section*{习题5.12}
+欲证$Even$ Turing-可计算，只需构造机器$E$满足:
+\begin{align*}
+	E|&1:0\pt1^{2x+1}0\cdots \twoheadrightarrow u : 0\cdots0\pt10\cdots\\
+	E|&1:0\pt1^{2x}0\cdots \twoheadrightarrow u : 0\cdots0\pt110\cdots\\
+\end{align*}
+其中$E(1,u)$无定义. 
+$E$可如下构造:
+\begin{center}
+\begin{tabular}{|c|c|c|}
+	\hline
+	&0&1\\
+	\hline
+	1&1L3&0R2\\
+	2&1O4&0R4\\
+	3&1O3&\\
+	\hline
+\end{tabular}
+\end{center}
+$E(1,1)$的$E(1,2)$形成循环将成对的1改为0. 若有奇数个1,最后会执行$M(0,2)$停机,输出$\overline 0$.若有偶数个1,最后会执行$M(0,1),M(0,3)$停机, 输出$\overline 1$. 
+\section*{习题5.17}
+首先0,1显然都不是一个合法的机器编码, 假定输入至少为2. 
+
+此题的关键在于给定机器$M$的编码$\#M$如何确定其行数.
+解法为:
+
+设$M$有$k+1$行，那么显然有$k < \#M$. 
+从而设$k = \max z \le \#M, [p_z | \#M]$, 
+
+一但$k$确定, 那么对于各行的解码过程都是可计算的. 一旦出现不合法的行则解码失败, 全部成功解码则说明输入是一个合法的机器编码, 属于$S$. 
+
+反过来由于编码和解码是一对逆过程,那么解码失败的输入一定不属于$S$. 
+
+如果我们承认CT,那么我们已经给出了一个能行的方法判定$S$, 从而$S$是Turing-可计算的. 
+
+若持有更保守的观点, 那可以通过证明$S$为递归集来证明其Turing-可计算. 过程繁杂从略. 
+
+\section*{习题5.18}
+
+
+由Taylor公式
+$$e=\sum_{i=0}^n\frac{1}{i!}+\frac{e^\theta}{(n+1)!}, \quad 0<\theta<1$$
+\begin{enumerate}[(1)]
+\item 
+令$f(n) = \floor{e\cdot n!}$, 我们往证$f \in \mathcal{PRF}$:\\
+$f(0)=f(1)=2$, 当$n\ge 2$
+$$f(n)=\left(\sum_{i=0}^n\frac{1}{i!}\right)n!+\frac{e^\theta}{n+1}$$
+注意到当$n\ge 2$时$0< \frac{e^\theta}{n+1} < 1$, 从而
+$$f(n) = \sum_{i=0}^n (n-1)!$$
+于是$f \in \mathcal{PRF}$. 
+\item
+令$h(n)=\floor{e\dot n}$
+则$h(0)=0,\quad h(n) = \floor{\frac{g(n)}{(n-1)!}}, n \ge 1$.  \\
+从而$h \in \mathcal{PRF}$. 
+\item
+$$g(1) = 2$$
+$$g(n) = h(10^n) \dotminus h(10^{n\dotminus 1}) \cdot 10, \quad n > 1$$
+从而$g \in \mathcal{PRF}$, 于是$g$可计算。
+
+\end{enumerate}
+注意到余项的上界$\frac{e}{(n+1)!}$严格单调递减且收敛速度超过指数函数, 此题也可以设计数值算法来求$e$的前$n$位有效数字, 进而通过CT说明$g$可计算. 
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
