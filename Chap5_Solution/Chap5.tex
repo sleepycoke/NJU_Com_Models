@@ -24,7 +24,7 @@
 %\date{}
 \begin{document}
 
-\title{《计算模型导引》第五章参考答案\footnote{Ver. 0.2. 原答案由宋方敏教授给出手稿, 然后由丁超录入修订补充. 此文档来源为\url{https://github.com/sleepycoke/NJU_Com_Models}}}
+\title{《计算模型导引》第五章参考答案\footnote{Ver. 0.3. 原答案由宋方敏教授给出手稿, 然后由丁超录入修订补充. 此文档来源为\url{https://github.com/sleepycoke/NJU_Com_Models}}}
 \maketitle
 
 \section*{习题5.1}
@@ -338,7 +338,7 @@ $$e=\sum_{i=0}^n\frac{1}{i!}+\frac{e^\theta}{(n+1)!}, \quad 0<\theta<1$$
 \item 
 令$f(n) = \floor{e\cdot n!}$, 我们往证$f \in \mathcal{EF}$:\\
 $f(0)=f(1)=2$, 当$n\ge 2$
-$$f(n)=\left(\sum_{i=0}^n\frac{1}{i!}\right)n!+\frac{e^\theta}{n+1}$$
+$$f(n)=\floor{\left(\sum_{i=0}^n\frac{1}{i!}\right)n!+\frac{e^\theta}{n+1}} = \floor{\sum_{i=0}^n \binom{n}{i} (n-i)!+\frac{e^\theta}{n+1}}$$
 注意到当$n\ge 2$时$0< \frac{e^\theta}{n+1} < 1$, 从而
 $$f(n) = \sum_{i=0}^n \binom{n}{i} (n-i)!$$
 于是$f \in \mathcal{EF}$. 
