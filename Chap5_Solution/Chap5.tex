@@ -336,20 +336,28 @@ $E(1,1)$的$E(1,2)$形成循环将成对的1改为0. 若有奇数个1,最后会�
 $$e=\sum_{i=0}^n\frac{1}{i!}+\frac{e^\theta}{(n+1)!}, \quad 0<\theta<1$$
 \begin{enumerate}[(1)]
 \item 
-令$f(n) = \floor{e\cdot n!}$, 我们往证$f \in \mathcal{PRF}$:\\
+令$f(n) = \floor{e\cdot n!}$, 我们往证$f \in \mathcal{EF}$:\\
 $f(0)=f(1)=2$, 当$n\ge 2$
 $$f(n)=\left(\sum_{i=0}^n\frac{1}{i!}\right)n!+\frac{e^\theta}{n+1}$$
 注意到当$n\ge 2$时$0< \frac{e^\theta}{n+1} < 1$, 从而
-$$f(n) = \sum_{i=0}^n (n-1)!$$
-于是$f \in \mathcal{PRF}$. 
+$$f(n) = \sum_{i=0}^n \binom{n}{i} (n-i)!$$
+于是$f \in \mathcal{EF}$. 
 \item
-令$h(n)=\floor{e\dot n}$
-则$h(0)=0,\quad h(n) = \floor{\frac{g(n)}{(n-1)!}}, n \ge 1$.  \\
-从而$h \in \mathcal{PRF}$. 
+令$h(n)=\floor{e\cdot n}$
+则$h(0)=0,\quad h(n) = \floor{\frac{e\cdot n!}{(n-1)!}} = \floor{\frac{f(n)}{(n-1)!}}\.(*), n \ge 1$.  \\
+从而$h \in \mathcal{EF}$. \\
+注: 下面给出(*)的证明: \\
+设$$e\cdot n! = k_1(n-1)! + r_1$$
+$$f(n) = k_2(n-1)! + r_2$$
+其中$k_1, k_2 \in \mathbb{N},\quad r_1, r_2 \in [0, (n-1)!)$\\
+由于$f(n)$为整数, 我们有$r_2 \in [0, (n-1)! - 1]$. 
+那么
+$$r \triangleq e\cdot n! - f(n) = (k_1 - k_2) (n-1)! + (r_1 - r_2) \in [0, 1)$$
+又$r_1 - r_2 \in [1-(n-1)!, \.(n-1)!\.)$, 从而$k_1 = k_2$. 
 \item
 $$g(1) = 2$$
 $$g(n) = h(10^n) \dotminus h(10^{n\dotminus 1}) \cdot 10, \quad n > 1$$
-从而$g \in \mathcal{PRF}$, 于是$g$可计算。
+从而$g \in \mathcal{EF}$, 于是$g$可计算。
 
 \end{enumerate}
 注意到余项的上界$\frac{e}{(n+1)!}$严格单调递减且收敛速度超过指数函数, 此题也可以设计数值算法来求$e$的前$n$位有效数字, 进而通过CT说明$g$可计算. 
